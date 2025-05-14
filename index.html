@@ -1,0 +1,1491 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TekkenOnline | Fight for Money</title>
+    <link rel="shortcut icon" href="images/fav.png" type="image/png">
+    <link rel="stylesheet" href="css/all.min.css">
+    <style>
+        :root {
+            --primary: #E50914;
+            --secondary: #B81D24;
+            --dark: #221F1F;
+            --light: #F5F5F1;
+            --accent: #FFD700;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            background-color: var(--dark);
+            background: url("images/back.jpg");
+            background-size: cover;
+        }
+        
+        @font-face {
+            font-family: 'Rajdhani';
+            src: url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;700&display=swap');
+        }
+        
+        /* Fighting Arena Background */
+        .arena-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('https://images.hdqwalls.com/wallpapers/tekken-7-4k-2020-3t.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        /* Blood Splatter Effect */
+        .blood-splatter {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/blood.png');
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        /* Server Card */
+        .server-card {
+            background: rgba(34, 31, 31, 0.9);
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border-left: 5px solid var(--primary);
+            animation: slideDown 0.8s ease-out;
+        }
+        
+        .server-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .server-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 1px;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0,0,0,0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+        }
+        
+        .online-dot {
+            width: 12px;
+            height: 12px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .server-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.8rem;
+            border-radius: 5px;
+            border-left: 3px solid var(--secondary);
+        }
+        
+        .info-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.3rem;
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: var(--light);
+        }
+        
+        .server-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .social-links a {
+            color: rgba(255, 255, 255, 0.7);
+            margin-right: 1rem;
+            transition: color 0.3s;
+        }
+        
+        .social-links a:hover {
+            color: var(--primary);
+        }
+        
+        /* Main Menu */
+        .menu-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .menu-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            position: relative;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .tab-btn.active {
+            color: white;
+            background: rgba(229, 9, 20, 0.2);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Home Tab */
+        .game-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .feature-card {
+            background: rgba(34, 31, 31, 0.8);
+            border-radius: 5px;
+            padding: 1.5rem;
+            transition: transform 0.3s;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary);
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        
+        /* Play Tab */
+        .character-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .character-card {
+            background: rgba(34, 31, 31, 0.8);
+            border-radius: 5px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            position: relative;
+        }
+        
+        .character-card:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+        }
+        
+        .character-card.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
+        }
+        
+        .character-image {
+            height: 180px;
+            background-size: cover;
+            background-position: top;
+        }
+        
+        .character-name {
+            padding: 0.8rem;
+            text-align: center;
+            background: rgba(0,0,0,0.7);
+            font-weight: bold;
+        }
+        
+        /* Betting Section */
+        .betting-section {
+            background: rgba(34, 31, 31, 0.8);
+            padding: 1.5rem;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+        }
+        
+        .bet-amount {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .bet-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--primary);
+            color: white;
+            padding: 0.8rem;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .bet-quick {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .bet-btn {
+            background: rgba(229, 9, 20, 0.3);
+            border: none;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .bet-btn:hover {
+            background: var(--primary);
+        }
+        
+        /* Leaderboard Tab */
+        .leaderboard {
+            background: rgba(34, 31, 31, 0.8);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+        }
+        
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 50px 1fr 100px 100px;
+            padding: 1rem;
+            background: rgba(229, 9, 20, 0.5);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .leaderboard-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 100px 100px;
+            padding: 1rem;
+            align-items: center;
+            border-bottom: 1px solid rgba(229, 9, 20, 0.1);
+        }
+        
+        .leaderboard-row:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        .rank {
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        .player {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        
+        .wins {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        /* Shop Tab */
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+        
+        .shop-item {
+            background: rgba(34, 31, 31, 0.8);
+            border-radius: 5px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            position: relative;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+        }
+        
+        .shop-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 5px 15px rgba(229, 9, 20, 0.3);
+        }
+        
+        .item-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent);
+            color: var(--dark);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        .item-image {
+            height: 120px;
+            background: #3a4049;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background-size: cover;
+            background-position: top;
+        }
+        
+        .item-details {
+            padding: 1rem;
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .item-price {
+            color: var(--accent);
+            font-weight: 700;
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .buy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .buy-btn:hover {
+            background: #c11119;
+        }
+        
+        /* Settings Tab */
+        .settings-section {
+            margin-bottom: 2rem;
+            background: rgba(34, 31, 31, 0.8);
+            padding: 1.5rem;
+            border-radius: 5px;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+        }
+        
+        .settings-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .setting-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .select-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--primary);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 5px;
+            min-width: 150px;
+        }
+        
+        /* Fullscreen Loader */
+        .fullscreen-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .fullscreen-loader.active {
+            display: flex;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        
+        .loading-progress {
+            width: 80%;
+            max-width: 400px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            animation: progressAnimation 3s infinite linear;
+        }
+        
+        .loading-text {
+            text-align: center;
+            margin-top: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .loading-details {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .tekken-logo {
+            width: 300px;
+            margin-bottom: 2rem;
+            filter: drop-shadow(0 0 10px rgba(229, 9, 20, 0.7));
+        }
+        
+        /* Fight Animation */
+        .fight-animation {
+            position: absolute;
+            font-size: 5rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(229, 9, 20, 0.7);
+            opacity: 0;
+            animation: fightAnimation 1.5s ease-out;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        @keyframes fightAnimation {
+            0% { transform: scale(0.5); opacity: 0; }
+            20% { transform: scale(1.2); opacity: 1; }
+            80% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        /* Animations */
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes progressAnimation {
+            0% { width: 0%; }
+            50% { width: 80%; }
+            100% { width: 100%; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .server-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .menu-tabs {
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+            
+            .character-select {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+        }
+        
+        /* Utility Classes */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        
+        .btn:hover {
+            background: #c11119;
+            transform: translateY(-2px);
+        }
+        
+        .btn-accent {
+            background: var(--accent);
+            color: var(--dark);
+        }
+        
+        .btn-accent:hover {
+            background: #e6c200;
+        }
+        
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+        }
+        
+        .text-accent {
+            color: var(--accent);
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-2 {
+            margin-bottom: 2rem;
+        }
+        
+        /* Fight Result Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: rgba(34, 31, 31, 0.95);
+            border-radius: 5px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 30px rgba(229, 9, 20, 0.5);
+            text-align: center;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-title {
+            color: var(--accent);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-family: 'Rajdhani', sans-serif;
+            text-transform: uppercase;
+        }
+        
+        .modal-text {
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .modal-prize {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+        
+        .fighters {
+            display: flex;
+            justify-content: space-around;
+            margin: 2rem 0;
+        }
+        
+        .fighter {
+            text-align: center;
+        }
+        
+        .fighter-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--primary);
+            background-position: top;
+        }
+        
+        .vs {
+            align-self: center;
+            font-size: 2rem;
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .winner {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="arena-bg">
+        <div class="blood-splatter"></div>
+    </div>
+
+    <div class="fullscreen-loader" id="fullscreenLoader">
+        <!-- <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Tekken_7_logo.svg/1200px-Tekken_7_logo.svg.png" class="tekken-logo"> -->
+        <div class="loading-content" id="loadingContent" style="display: none; text-align: center;align-items: center;flex-direction: column;">
+            <div class="loading-spinner"></div>
+            <div class="loading-progress">
+                <div class="progress-bar"></div>
+            </div>
+            <h2 class="loading-text">Connecting to TekkenOnline...</h2>
+            <div class="loading-details">
+                <div id="loading-step">Finding opponent...</div>
+                <div id="loading-percentage">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="resultModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeModal">�</button>
+            <h2 class="modal-title" id="resultTitle">Victory!</h2>
+            <div class="fighters">
+                <div class="fighter">
+                    <div class="fighter-image" id="playerFighter" style="background-image: url('https://www.fightersgeneration.com/nf7/char/kazuya-mishima-tekken7-render.png');"></div>
+                    <h3 id="playerName">You</h3>
+                </div>
+                <div class="vs">VS</div>
+                <div class="fighter">
+                    <div class="fighter-image" id="opponentFighter" style="background-image: url('https://www.fightersgeneration.com/nf7/char/heihachi-mishima-tekken7-render.png');"></div>
+                    <h3 id="opponentName">Opponent</h3>
+                </div>
+            </div>
+            <p class="modal-text" id="resultText">You defeated your opponent in an epic battle!</p>
+            <div class="modal-prize" id="prizeAmount">+$50.00</div>
+            <button class="btn btn-accent btn-large" id="continueBtn">Continue</button>
+        </div>
+    </div>
+
+    <!-- Server Card -->
+    <div class="server-card">
+        <div class="server-header">
+            <h1 class="server-title">TEKKENONLINE</h1>
+            <div class="server-status">
+                <div class="online-dot"></div>
+                <span class="online-count">Online: 3/500</span>
+            </div>
+        </div>
+        
+        <div class="server-info">
+            <div class="info-item">
+                <div class="info-label">VERSION</div>
+                <div class="info-value">v2.5.1</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">MODE</div>
+                <div class="info-value">Ranked Money Matches</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">MIN BET</div>
+                <div class="info-value">5.00 $TEKKEN</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">MAX BET</div>
+                <div class="info-value">10000.00 $TEKKEN</div>
+            </div>
+        </div>
+        
+        <p style="margin-bottom: 1rem; line-height: 1.6;">
+            Jack each other's cash in the legendary game of Tekken
+        </p>
+        
+        <div class="server-footer">
+            <div class="social-links">
+                <a href="https://x.com/Tekken_Online" target="_blank"><i class="fab fa-twitter"></i> @Tekken_Online</a>
+                <a href="https://discord.gg/tekken" target="_blank"><i class="fab fa-discord"></i> Discord</a>
+                <p>CA: CHoyzxrirAdJi9vKnNkci7zpCGFmF1e5WRYqdkbspump</p>
+            </div>
+            <div class="ca-token">
+                <span style="background: rgba(255, 255, 255, 0.1); padding: 0.3rem 0.6rem; border-radius: 20px; font-size: 0.8rem;">
+                    <i class="fas fa-wallet"></i> Balance: 0 $TEKKEN
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Menu -->
+    <div class="menu-container">
+        <div class="menu-tabs">
+            <button class="tab-btn active" data-tab="home">Home</button>
+            <button class="tab-btn" data-tab="fight">Fight</button>
+            <button class="tab-btn" data-tab="leaderboard">Leaderboard</button>
+            <button class="tab-btn" data-tab="shop">Shop</button>
+            <button class="tab-btn" data-tab="settings">Settings</button>
+        </div>
+        
+        <!-- Home Tab -->
+        <div id="home" class="tab-content active">
+            <div class="game-features">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-fist-raised"></i>
+                    </div>
+                    <h3>Real Money Fights</h3>
+                    <p>Challenge players worldwide and win real cash prizes in intense 1v1 battles.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>Ranked Tournaments</h3>
+                    <p>Compete in daily and weekly tournaments with huge prize pools.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Global Leaderboards</h3>
+                    <p>Prove you're the best and climb to the top of the worldwide rankings.</p>
+                </div>
+            </div>
+            
+            <button id="quick-fight-btn" class="btn btn-accent btn-large" style="margin: 2rem auto; display: block;">
+                <i class="fas fa-bolt"></i> Launch Tekken
+            </button>
+            
+            <div style="background: rgba(229, 9, 20, 0.2); padding: 1rem; border-radius: 5px; border-left: 3px solid var(--accent);">
+                <h3 style="color: var(--accent); margin-bottom: 0.5rem;"><i class="fas fa-exclamation-triangle"></i> Tournament Announcement</h3>
+                <p>The weekly King of Iron Fist Tournament starts in 2 hours! 2000 $TEKKEN prize pool. <a href="#" style="color: var(--accent);">Click here to register</a>.</p>
+            </div>
+        </div>
+
+        <!-- Fight Tab -->
+        <div id="fight" class="tab-content">
+            <h2 class="text-accent text-center mb-2">SELECT YOUR FIGHTER</h2>
+            
+            <div class="character-select">
+                <div class="character-card" data-character="kazuya">
+                    <div class="character-image" style="background-image: url('images/Kazuya.webp');"></div>
+                    <div class="character-name">Kazuya</div>
+                </div>
+                <div class="character-card" data-character="heihachi">
+                    <div class="character-image" style="background-image: url('images/heih.jpg');"></div>
+                    <div class="character-name">Heihachi</div>
+                </div>
+                <div class="character-card" data-character="jin">
+                    <div class="character-image" style="background-image: url('images/jin.webp');"></div>
+                    <div class="character-name">Jin</div>
+                </div>
+                <div class="character-card" data-character="paul">
+                    <div class="character-image" style="background-image: url('images/paul.webp');"></div>
+                    <div class="character-name">Paul</div>
+                </div>
+                <div class="character-card" data-character="king">
+                    <div class="character-image" style="background-image: url('images/king.webp');"></div>
+                    <div class="character-name">King</div>
+                </div>
+                <div class="character-card" data-character="hwoarang">
+                    <div class="character-image" style="background-image: url('images/hwoarang.jpg');"></div>
+                    <div class="character-name">Hwoarang</div>
+                </div>
+            </div>
+            
+            <div class="betting-section">
+                <h3 class="text-accent"><i class="fas fa-coins"></i> PLACE YOUR BET</h3>
+                <p>Minimum bet: 5.00 $TEKKEN| Maximum bet: 500.00 $TEKKEN</p>
+                
+                <div class="bet-amount">
+                    <input type="number" class="bet-input" id="betAmount" placeholder="Enter amount ($)" min="5" max="500" value="10">
+                    <button class="btn" id="maxBetBtn">MAX</button>
+                </div>
+                
+                <div class="bet-quick">
+                    <button class="bet-btn" data-amount="5">5 $TEKKEN</button>
+                    <button class="bet-btn" data-amount="10">10 $TEKKEN</button>
+                    <button class="bet-btn" data-amount="25">25 $TEKKEN</button>
+                    <button class="bet-btn" data-amount="50">50 $TEKKEN</button>
+                    <button class="bet-btn" data-amount="100">100 $TEKKEN</button>
+                </div>
+            </div>
+            
+            <button id="start-fight-btn" class="btn btn-accent btn-large" style="margin: 1rem auto; display: block;">
+                <i class="fas fa-fist-raised"></i> START FIGHT
+            </button>
+            
+            <div style="background: rgba(255, 215, 0, 0.1); padding: 1rem; border-radius: 5px; border-left: 3px solid var(--accent);">
+                <h3 style="color: var(--accent); margin-bottom: 0.5rem;"><i class="fas fa-info-circle"></i> Fight Rules</h3>
+                <ul style="padding-left: 1.5rem; line-height: 1.6;">
+                    <li>Best of 3 rounds</li>
+                    <li>60 second time limit</li>
+                    <li>Winner takes 90% of total bet (10% house fee)</li>
+                    <li>Disconnections count as losses</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Leaderboard Tab -->
+        <div id="leaderboard" class="tab-content">
+            <h2 class="text-accent text-center mb-2">TOP FIGHTERS</h2>
+            
+            <div class="leaderboard">
+                <div class="leaderboard-header">
+                    <div>Rank</div>
+                    <div>Player</div>
+                    <div>Wins</div>
+                    <div>Earnings</div>
+                </div>
+                
+                <div class="leaderboard-row">
+                    <div class="rank">#1</div>
+                    <div class="player">
+                        <div class="avatar">JD</div>
+                        <span>KillerKazuya</span>
+                    </div>
+                    <div class="wins">127</div>
+                    <div>5,430 $TEKKEN</div>
+                </div>
+                
+                <div class="leaderboard-row">
+                    <div class="rank">#2</div>
+                    <div class="player">
+                        <div class="avatar">MS</div>
+                        <span>MishimaStyle</span>
+                    </div>
+                    <div class="wins">98</div>
+                    <div>4,215 $TEKKEN</div>
+                </div>
+                
+                <div class="leaderboard-row">
+                    <div class="rank">#3</div>
+                    <div class="player">
+                        <div class="avatar">SB</div>
+                        <span>ShadowBlade</span>
+                    </div>
+                    <div class="wins">87</div>
+                    <div>3,780 $TEKKEN</div>
+                </div>
+                
+                <div class="leaderboard-row">
+                    <div class="rank">#4</div>
+                    <div class="player">
+                        <div class="avatar">AL</div>
+                        <span>AztecLord</span>
+                    </div>
+                    <div class="wins">79</div>
+                    <div>3,530 $TEKKEN</div>
+                </div>
+              
+            </div>
+            
+            <div style="margin-top: 1rem; text-align: center; color: rgba(255, 255, 255, 0.6); font-size: 0.9rem;">
+                Updated 3 minutes ago | Your rank: #47
+            </div>
+        </div>
+        
+        <!-- Shop Tab -->
+        <div id="shop" class="tab-content">
+            <h2 class="text-accent text-center mb-2">TEKKEN STORE</h2>
+            
+            <h3 class="text-accent" style="margin: 1.5rem 0 1rem;"><i class="fas fa-user"></i> Characters</h3>
+            <div class="shop-items">
+                <div class="shop-item">
+                    <div class="item-badge">NEW</div>
+                    <div class="item-image" style="background-image: url('images/akuma.webp');"></div>
+                    <div class="item-details">
+                        <h4>Akuma</h4>
+                        <div class="item-price">
+                            <span>9.99 $TEKKEN</span>
+                        </div>
+                        <button class="buy-btn">Purchase</button>
+                    </div>
+                </div>
+                <div class="shop-item">
+                    <div class="item-image" style="background-image: url('images/geese.webp');"></div>
+                    <div class="item-details">
+                        <h4>Geese Howard</h4>
+                        <div class="item-price">
+                            <span>7.99 $TEKKEN</span>
+                        </div>
+                        <button class="buy-btn">Purchase</button>
+                    </div>
+                </div>
+                <div class="shop-item">
+                    <div class="item-image" style="background-image: url('images/lo.webp');"></div>
+                    <div class="item-details">
+                        <h4>Marshall Law</h4>
+                        <div class="item-price">
+                            <span>8.99 $TEKKEN</span>
+                        </div>
+                        <button class="buy-btn">Purchase</button>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+            <h3 class="text-accent" style="margin: 2rem 0 1rem;"><i class="fas fa-coins"></i> Currency Packs</h3>
+            <div class="shop-items">
+                <div class="shop-item">
+                    <div class="item-image" style="background: linear-gradient(135deg, #f368e0, #ff9ff3);">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="item-details">
+                        <h4>Starter Pack</h4>
+                        <div class="item-price">500 $TEKKEN</div>
+                        <button class="buy-btn">Buy Now</button>
+                    </div>
+                </div>
+                <div class="shop-item">
+                    <div class="item-image" style="background: linear-gradient(135deg, #2e86de, #54a0ff);">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="item-details">
+                        <h4>Advanced Pack</h4>
+                        <div class="item-price">1,200 $TEKKEN</div>
+                        <button class="buy-btn">Buy Now</button>
+                    </div>
+                </div>
+                <div class="shop-item">
+                    <div class="item-badge">BEST VALUE</div>
+                    <div class="item-image" style="background: linear-gradient(135deg, #10ac84, #1dd1a1);">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="item-details">
+                        <h4>Pro Pack</h4>
+                        <div class="item-price">3,000 $TEKKEN</div>
+                        <button class="buy-btn">Buy Now</button>
+                    </div>
+                </div>
+                <div class="shop-item">
+                    <div class="item-image" style="background: linear-gradient(135deg, #ff9f43, #feca57);">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="item-details">
+                        <h4>Mega Pack</h4>
+                        <div class="item-price">8,000 $TEKKEN</div>
+                        <button class="buy-btn">Buy Now</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem; background: rgba(229, 9, 20, 0.2); padding: 1rem; border-radius: 5px; border-left: 3px solid var(--accent);">
+                <h3 style="margin-bottom: 0.5rem; color: var(--accent);"><i class="fas fa-wallet"></i> Your Balance: 0 $TEKKEN</h3>
+                <button class="btn btn-accent">
+                    <i class="fas fa-plus-circle"></i> Add Funds
+                </button>
+            </div>
+        </div>
+        
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="settings-section">
+                <h3 class="settings-title"><i class="fas fa-sliders-h"></i> Controls</h3>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-gamepad"></i> Control Scheme
+                    </div>
+                    <select class="select-box">
+                        <option>Arcade Stick</option>
+                        <option selected="">Gamepad</option>
+                        <option>Keyboard</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-crosshairs"></i> Invert Y-Axis
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-running"></i> Button Layout
+                    </div>
+                    <select class="select-box">
+                        <option selected="">Type A</option>
+                        <option>Type B</option>
+                        <option>Type C</option>
+                        <option>Custom</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-title"><i class="fas fa-volume-up"></i> Audio</h3>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-volume-up"></i> Master Volume
+                    </div>
+                    <input type="range" min="0" max="100" value="80" class="select-box">
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-music"></i> Music Volume
+                    </div>
+                    <input type="range" min="0" max="100" value="60" class="select-box">
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-comment-alt"></i> Announcer Volume
+                    </div>
+                    <input type="range" min="0" max="100" value="100" class="select-box">
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-title"><i class="fas fa-globe"></i> Interface</h3>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-language"></i> Language
+                    </div>
+                    <select class="select-box">
+                        <option selected="">English</option>
+                        <option>Japanese</option>
+                        <option>Spanish</option>
+                        <option>French</option>
+                        <option>Russian</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-paint-brush"></i> Theme
+                    </div>
+                    <select class="select-box">
+                        <option selected="">Dark (Default)</option>
+                        <option>Blood Red</option>
+                        <option>Tournament Blue</option>
+                        <option>Gold Edition</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="btn btn-accent" style="margin-top: 1rem;">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding content
+                btn.classList.add('active');
+                const tabId = btn.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Simulate online players count
+        function updatePlayerCount() {
+            const currentPlayers = Math.floor(Math.random() * 1) + 2; // 100-150
+            document.querySelector('.online-count').textContent = `Online: ${currentPlayers}/500`;
+        }
+        
+        setInterval(updatePlayerCount, 5000);
+        updatePlayerCount(); // Initial call
+        
+        // Character selection
+        let selectedCharacter = 'kazuya'; // Default to first character
+        const characters = [
+            { id: 'kazuya', name: 'Kazuya', image: './Kazuya.webp' },
+            { id: 'heihachi', name: 'Heihachi', image: './heih.jpg' },
+            { id: 'jin', name: 'Jin', image: './jin.webp' },
+            { id: 'paul', name: 'Paul', image: './paul.webp' },
+            { id: 'king', name: 'King', image: './king.webp' },
+            { id: 'hwoarang', name: 'Hwoarang', image: './hwoarang.jpg' }
+        ];
+        
+        // Set first character as selected by default
+        document.querySelector('.character-card').classList.add('selected');
+        
+        document.querySelectorAll('.character-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedCharacter = this.getAttribute('data-character');
+            });
+        });
+        
+        // Quick bet buttons
+        document.querySelectorAll('.bet-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const amount = this.getAttribute('data-amount');
+                document.getElementById('betAmount').value = amount;
+            });
+        });
+        
+        // Max bet button
+        document.getElementById('maxBetBtn').addEventListener('click', function() {
+            document.getElementById('betAmount').value = '500';
+        });
+        
+        // Fight start functionality
+        function startLoading() {
+            const fullscreenLoader = document.getElementById('fullscreenLoader');
+            const loadingContent = document.getElementById('loadingContent');
+            
+            // Show fullscreen loader
+            fullscreenLoader.classList.add('active');
+            
+            // Show loading content after 1 second
+            setTimeout(() => {
+                loadingContent.style.display = 'flex';
+                
+                // Simulate loading steps
+                const loadingStep = document.getElementById('loading-step');
+                const loadingPercentage = document.getElementById('loading-percentage');
+                
+                const loadingSteps = [
+                    "Finding opponent...",
+                    "Verifying bet amount...",
+                    "Establishing connection...",
+                    "Synchronizing game state...",
+                    "Loading arena...",
+                    "Preparing fighters...",
+                    "Almost ready to fight..."
+                ];
+                
+                let currentStep = 0;
+                
+                const loadingInterval = setInterval(() => {
+                    currentStep = (currentStep + 1) % loadingSteps.length;
+                    loadingStep.textContent = loadingSteps[currentStep];
+                    
+                    const percent = Math.min(99, Math.floor(Math.random() * 85) + 10);
+                    loadingPercentage.textContent = `${percent}%`;
+                }, 2000);
+                
+                // After 6 seconds, show fight result
+                setTimeout(() => {
+                    clearInterval(loadingInterval);
+                    showFightResult();
+                }, 6000);
+            }, 1000);
+        }
+        
+        // Show fight result
+        function showFightResult() {
+            const fullscreenLoader = document.getElementById('fullscreenLoader');
+            fullscreenLoader.classList.remove('active');
+            
+            const resultModal = document.getElementById('resultModal');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultText = document.getElementById('resultText');
+            const prizeAmount = document.getElementById('prizeAmount');
+            const playerFighter = document.getElementById('playerFighter');
+            const playerName = document.getElementById('playerName');
+            const opponentFighter = document.getElementById('opponentFighter');
+            const opponentName = document.getElementById('opponentName');
+            
+            // Get selected character
+            const selectedChar = characters.find(c => c.id === selectedCharacter);
+            
+            // Get random opponent (excluding selected character)
+            const possibleOpponents = characters.filter(c => c.id !== selectedCharacter);
+            const randomOpponent = possibleOpponents[Math.floor(Math.random() * possibleOpponents.length)];
+            
+            // Set player and opponent info
+            playerFighter.style.backgroundImage = `url('${selectedChar.image}')`;
+            playerName.textContent = selectedChar.name;
+            opponentFighter.style.backgroundImage = `url('${randomOpponent.image}')`;
+            opponentName.textContent = randomOpponent.name;
+            
+            // Random outcome (70% chance to win)
+            const isWin = Math.random() > 0.3;
+            const betAmount = parseFloat(document.getElementById('betAmount').value) || 10;
+            const prize = isWin ? betAmount * 1.8 : 0;
+            
+            if (isWin) {
+                resultTitle.textContent = "VICTORY!";
+                resultText.textContent = `${selectedChar.name} defeated ${randomOpponent.name} in an epic battle!`;
+                prizeAmount.textContent = `+$${prize.toFixed(2)}`;
+                playerFighter.classList.add('winner');
+                opponentFighter.classList.remove('winner');
+            } else {
+                resultTitle.textContent = "DEFEAT";
+                resultText.textContent = `${selectedChar.name} was defeated by ${randomOpponent.name}!`;
+                prizeAmount.textContent = `-$${betAmount.toFixed(2)}`;
+                opponentFighter.classList.add('winner');
+                playerFighter.classList.remove('winner');
+            }
+            
+            resultModal.classList.add('active');
+        }
+        
+        // Close modal
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('resultModal').classList.remove('active');
+            document.getElementById('playerFighter').classList.remove('winner');
+            document.getElementById('opponentFighter').classList.remove('winner');
+        });
+        
+        document.getElementById('continueBtn').addEventListener('click', function() {
+            document.getElementById('resultModal').classList.remove('active');
+            document.getElementById('playerFighter').classList.remove('winner');
+            document.getElementById('opponentFighter').classList.remove('winner');
+        });
+        
+        // Start fight buttons
+        document.getElementById('quick-fight-btn').addEventListener('click', startLoading);
+        document.getElementById('start-fight-btn').addEventListener('click', function() {
+            if (!selectedCharacter) {
+                alert("Please select a fighter first!");
+                return;
+            }
+            startLoading();
+        });
+        
+        // Create fight animation on click
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn') || e.target.classList.contains('character-card')) {
+                const fightText = document.createElement('div');
+                fightText.className = 'fight-animation';
+                fightText.textContent = 'FIGHT!';
+                fightText.style.left = `50%`;
+                fightText.style.top = `50%`;
+                fightText.style.transform = `translate(-50%, -50%)`;
+                document.body.appendChild(fightText);
+                
+                setTimeout(() => {
+                    fightText.remove();
+                }, 1500);
+            }
+        });
+        
+        // Volume sliders
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+            slider.addEventListener('input', function() {
+                const value = this.value;
+                const settingLabel = this.closest('.setting-item').querySelector('.setting-label');
+                const icon = settingLabel.querySelector('i');
+                
+                // Update icon based on volume level
+                if (value > 66) {
+                    icon.className = 'fas fa-volume-up';
+                } else if (value > 33) {
+                    icon.className = 'fas fa-volume-down';
+                } else if (value > 0) {
+                    icon.className = 'fas fa-volume-off';
+                } else {
+                    icon.className = 'fas fa-volume-mute';
+                }
+            });
+        });
+    </script>
+
+</body></html>
